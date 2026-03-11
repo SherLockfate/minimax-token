@@ -1,0 +1,18 @@
+[Unit]
+Description=MiniMax Token Monitor
+After=network.target
+
+[Service]
+Type=simple
+User=kali
+WorkingDirectory=/home/kali/.openclaw/workspace/skills/minimax-token/scripts
+ExecStart=/usr/bin/python3 /home/kali/.openclaw/workspace/skills/minimax-token/scripts/minimax_token.py --monitor
+Restart=always
+RestartSec=10
+
+# 日志
+StandardOutput=append:/home/kali/.openclaw/logs/token_monitor.log
+StandardError=append:/home/kali/.openclaw/logs/token_monitor.log
+
+[Install]
+WantedBy=multi-user.target
