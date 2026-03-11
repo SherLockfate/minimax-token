@@ -16,28 +16,24 @@ import logging
 import argparse
 from datetime import datetime
 
-# 配置日志 - 使用环境变量，可自定义日志路径
-LOG_DIR = os.environ.get('OPENCLAW_LOG_DIR', os.path.expanduser('~/.openclaw/logs'))
-os.makedirs(LOG_DIR, exist_ok=True)
-log_file = os.path.join(LOG_DIR, 'token_monitor.log')
-
+# 配置日志
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(log_file),
+        logging.FileHandler('/home/kali/.openclaw/logs/token_monitor.log'),
         logging.StreamHandler(sys.stdout)
     ]
 )
 logger = logging.getLogger(__name__)
 
 # ============ 配置项 (请修改以下值) ============
-# 优先从环境变量读取，也可以在运行时传入
-TOKEN_API_KEY = os.environ.get('MINIMAX_API_KEY', '')
+# TODO: 替换为你的 MiniMax API Key
+TOKEN_API_KEY = "sk-cp-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 # TODO: 替换为你的 Telegram Bot Token
-TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "YOUR_BOT_TOKEN")
 # TODO: 替换为你的 Telegram Chat ID
-TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', '')
+TELEGRAM_CHAT_ID = "YOUR_CHAT_ID"
 # 检查间隔 (秒), 默认 1 小时
 CHECK_INTERVAL = 3600
 
@@ -46,15 +42,10 @@ def get_token_remaining():
     """查询 MiniMax API 剩余配额"""
     import subprocess
     
-    # 从环境变量或配置文件读取 API Key
-    api_key = os.environ.get('MINIMAX_API_KEY', TOKEN_API_KEY)
-    if not api_key or api_key == 'YOUR_API_KEY':
-        return {"error": "请设置 MINIMAX_API_KEY 环境变量"}
-    
     cmd = [
         "curl", "-s", "--location",
         "https://www.minimaxi.com/v1/api/openplatform/coding_plan/remains",
-        "--header", f"Authorization: Bearer {api_key}",
+        "--header", f"Authorization: Bearer {TOKEN_API_KEY}",
         "--header", "Content-Type: application/json"
     ]
     
@@ -101,17 +92,14 @@ def format_token_message(data):
 
 def send_telegram_message(message):
     """通过 Telegram Bot 发送消息"""
-    bot_token = os.environ.get('TELEGRAM_BOT_TOKEN', TELEGRAM_BOT_TOKEN)
-    chat_id = os.environ.get('TELEGRAM_CHAT_ID', TELEGRAM_CHAT_ID)
-    
-    if not bot_token or not chat_id:
-        logger.warning("TELEGRAM_BOT_TOKEN 或 TELEGRAM_CHAT_ID 未配置, 跳过通知")
+    if TELEGRAM_BOT_TOKEN in ["YOUR_BOT_TOKEN", "", None]:
+        logger.warning("TELEGRAM_BOT_TOKEN 未配置, 跳过通知")
         print(f"[TOKEN] {message}")
         return False
     
-    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {
-        "chat_id": chat_id,
+        "chat_id": TELEGRAM_CHAT_ID,
         "text": message
     }
     
@@ -156,13 +144,8 @@ def main():
     parser = argparse.ArgumentParser(description="MiniMax Token 检查工具")
     parser.add_argument("--check", action="store_true", help="单次检查 Token 余额")
     parser.add_argument("--monitor", action="store_true", help="启动定时监控")
-    parser.add_argument("--api-key", help="MiniMax API Key (或设置 MINIMAX_API_KEY 环境变量)")
     
     args = parser.parse_args()
-    
-    # 如果传入 API Key，临时使用
-    if args.api_key:
-        os.environ['MINIMAX_API_KEY'] = args.api_key
     
     if args.check:
         check_once()
