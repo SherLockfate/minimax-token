@@ -34,10 +34,8 @@ logger = logging.getLogger(__name__)
 # ============ 配置项 (请修改以下值) ============
 # 优先从环境变量读取
 TOKEN_API_KEY = os.environ.get('MINIMAX_API_KEY', '')
-# TODO: 替换为你的 Telegram Bot Token
-TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "YOUR_BOT_TOKEN")
-# TODO: 替换为你的 Telegram Chat ID
-TELEGRAM_CHAT_ID = "YOUR_CHAT_ID"
+TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')
+TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', '')
 # 检查间隔 (秒), 默认 1 小时
 CHECK_INTERVAL = 3600
 
@@ -46,7 +44,10 @@ def get_token_remaining():
     """查询 MiniMax API 剩余配额"""
     import subprocess
     
-    cmd = [
+    # 从环境变量读取 API Key
+    api_key = os.environ.get('MINIMAX_API_KEY', TOKEN_API_KEY)
+    if not api_key:
+        return {"error": "请设置 MINIMAX_API_KEY 环境变量"}
         "curl", "-s", "--location",
         "https://www.minimaxi.com/v1/api/openplatform/coding_plan/remains",
         "--header", f"Authorization: Bearer {TOKEN_API_KEY}",

@@ -4,15 +4,21 @@ After=network.target
 
 [Service]
 Type=simple
-User=kali
-WorkingDirectory=/home/kali/.openclaw/workspace/skills/minimax-token/scripts
-ExecStart=/usr/bin/python3 /home/kali/.openclaw/workspace/skills/minimax-token/scripts/minimax_token.py --monitor
+User=%u
+WorkingDirectory=%h/.openclaw/workspace/skills/minimax-token/scripts
+ExecStart=/usr/bin/python3 %h/.openclaw/workspace/skills/minimax-token/scripts/minimax_token.py --monitor
 Restart=always
 RestartSec=10
 
-# 日志
-StandardOutput=append:/home/kali/.openclaw/logs/token_monitor.log
-StandardError=append:/home/kali/.openclaw/logs/token_monitor.log
+# 日志 - 使用环境变量
+StandardOutput=append:%h/.openclaw/logs/token_monitor.log
+StandardError=append:%h/.openclaw/logs/token_monitor.log
+
+# 环境变量配置 (运行时设置)
+# Environment=MINIMAX_API_KEY=your_api_key
+# Environment=TELEGRAM_BOT_TOKEN=your_bot_token
+# Environment=TELEGRAM_CHAT_ID=your_chat_id
+# Environment=OPENCLAW_LOG_DIR=%h/.openclaw/logs
 
 [Install]
 WantedBy=multi-user.target
