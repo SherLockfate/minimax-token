@@ -16,20 +16,24 @@ import logging
 import argparse
 from datetime import datetime
 
-# 配置日志
+# 配置日志 - 使用环境变量
+LOG_DIR = os.environ.get('OPENCLAW_LOG_DIR', os.path.expanduser('~/.openclaw/logs'))
+os.makedirs(LOG_DIR, exist_ok=True)
+log_file = os.path.join(LOG_DIR, 'token_monitor.log')
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('/home/kali/.openclaw/logs/token_monitor.log'),
+        logging.FileHandler(log_file),
         logging.StreamHandler(sys.stdout)
     ]
 )
 logger = logging.getLogger(__name__)
 
 # ============ 配置项 (请修改以下值) ============
-# TODO: 替换为你的 MiniMax API Key
-TOKEN_API_KEY = "sk-cp-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+# 优先从环境变量读取
+TOKEN_API_KEY = os.environ.get('MINIMAX_API_KEY', '')
 # TODO: 替换为你的 Telegram Bot Token
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "YOUR_BOT_TOKEN")
 # TODO: 替换为你的 Telegram Chat ID
